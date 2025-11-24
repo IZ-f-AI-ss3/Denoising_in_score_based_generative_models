@@ -45,6 +45,14 @@ class ToyRunner():
         return init
 
     @staticmethod
+    def half_denoising_langevin_dynamics(score, init, lr=0.1, step=1000):
+        for i in range(step):
+            current_lr = lr
+            init = init + current_lr / 2 * score(init).detach()
+            init = init + torch.randn_like(init) * np.sqrt(current_lr)
+        return init
+
+    @staticmethod
     def anneal_langevin_dynamics(score, init, sigmas, lr=0.1, n_steps_each=100):
         for sigma in sigmas:
             for i in range(n_steps_each):

@@ -229,7 +229,7 @@ class ToyRunner():
     def annealed_sampling_exp(self, left_bound=-8, right_bound=8):
         sns.set(font_scale=1.3)
         sns.set_style('white')
-        savefig = r'/Users/yangsong/Desktop'
+        savefig = r'/content/Denoising_in_score_based_generative_models/tmp/toy_figs/'
 
         teacher = GMMDistAnneal(dim=2)
         mesh = []
@@ -295,6 +295,19 @@ class ToyRunner():
 
         if savefig is not None:
             plt.savefig(savefig + "/annealed_langevin_samples.png", bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
+            
+        samples = torch.rand(1280, 2) * (right_bound - left_bound) + left_bound
+        samples = ToyRunner.half_denoising_langevin_dynamics(teacher.score, samples, sigma=sigmas[-1]).detach().numpy()
+        plt.scatter(samples[:, 0], samples[:, 1], s=0.2)
+        plt.axis('square')
+        plt.title('Langevin dynamics samples')
+        plt.xlim([left_bound, right_bound])
+        plt.ylim([left_bound, right_bound])
+        if savefig is not None:
+            plt.savefig(savefig + "/half_denosing_langevin_samples.png", bbox_inches='tight')
             plt.close()
         else:
             plt.show()

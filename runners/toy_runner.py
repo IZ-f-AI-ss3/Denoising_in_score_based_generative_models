@@ -232,7 +232,7 @@ class ToyRunner():
         self.visualize(teacher, score, -8, 8, savefig=self.args.log)
 
         teacher.eval()
-        self.annealed_sampling_exp()
+        self.annealed_sampling_exp(left_bound=-8, right_bound=8, save_fig = self.args.log)
 
     def annealed_sampling_exp(self, left_bound=-8, right_bound=None, save_fig = None ):
         sns.set(font_scale=1.3)

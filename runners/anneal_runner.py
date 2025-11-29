@@ -246,9 +246,7 @@ class AnnealRunner():
             for c, sigma in tqdm.tqdm(enumerate(sigmas), total=len(sigmas), desc='half-denoising Langevin dynamics sampling'):
                 labels = torch.ones(x_mod.shape[0], device=x_mod.device) * c
                 labels = labels.long()
-                # Calculate eps
                 # step_size = step_lr * (sigma / sigmas[-1]) ** 2
-                
                 for s in range(n_steps_each):
                     images.append(torch.clamp(x_mod, 0.0, 1.0).to('cpu'))
 
@@ -282,8 +280,9 @@ class AnnealRunner():
         if self.config.data.dataset == 'MNIST':
             samples = torch.rand(grid_size ** 2, 1, 28, 28, device=self.config.device)
             # Using custom_anneal_Langevin_dynamics for MNIST 
-            sigmas = [sigmas[-1]]
-            all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
+            final_sigma_list = [sigmas[-1]]
+            all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, final_sigma_list, 200, 0.00002)
+            # all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
             # all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
 
 

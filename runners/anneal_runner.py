@@ -219,6 +219,26 @@ class AnnealRunner():
             return images
 
 
+    # def custom_anneal_Langevin_dynamics(self, x_mod, scorenet, sigmas, n_steps_each=100, step_lr=0.00002):
+    #     images = []
+    #     with torch.no_grad():
+    #         for c, sigma in tqdm.tqdm(enumerate(sigmas), total=len(sigmas), desc='custom Langevin dynamics sampling'):
+    #             labels = torch.ones(x_mod.shape[0], device=x_mod.device) * c
+    #             labels = labels.long()
+    #             # Calculate eps
+    #             step_size = step_lr * (sigma / sigmas[-1]) ** 2
+    #             for s in range(n_steps_each):
+    #                 images.append(torch.clamp(x_mod, 0.0, 1.0).to('cpu'))
+    #                 noise = torch.randn_like(x_mod)
+    #                 # score of current x_mod (which is xt tilde)
+    #                 grad = scorenet(x_mod, labels)
+    #                 # xt+1 = xt tild + eps/2 * score(xt tilde)
+    #                 x_next = x_mod + (step_size / 2) * grad
+    #                 # xt + sqt(eps) * zt
+    #                 x_noise_component = x_next + np.sqrt(step_size) * noise
+    #                 x_mod = torch.max(x_mod, x_noise_component)
+    #         return images
+
     def custom_anneal_Langevin_dynamics(self, x_mod, scorenet, sigmas, n_steps_each=100, step_lr=0.00002):
         images = []
 
@@ -227,23 +247,18 @@ class AnnealRunner():
                 labels = torch.ones(x_mod.shape[0], device=x_mod.device) * c
                 labels = labels.long()
                 # Calculate eps
-                step_size = step_lr * (sigma / sigmas[-1]) ** 2
+                # step_size = step_lr * (sigma / sigmas[-1]) ** 2
                 
                 for s in range(n_steps_each):
                     images.append(torch.clamp(x_mod, 0.0, 1.0).to('cpu'))
 
                     noise = torch.randn_like(x_mod)
-    
-                    # score of current x_mod (which is xt tilde)
-                    grad = scorenet(x_mod, labels)
-
-                    # xt+1 = xt tild + eps/2 * score(xt tilde)
-                    x_next = x_mod + (step_size / 2) * grad
-                    
-                    # xt + sqt(eps) * zt
-                    x_noise_component = x_next + np.sqrt(step_size) * noise
-
-                    x_mod = torch.max(x_mod, x_noise_component)
+                    # x_tilde = xt + sigma * zt
+                    x_tilde = x_mod + sigma * noise
+                    # score on x_tilde
+                    grad = scorenet(x_tilde, labels)
+                    # xt+1 = x_tilde + (sigma^2 / 2) * score(x_tilde)
+                    x_mod = x_tilde + (sigma ** 2 / 2) * grad
 
             return images
 
@@ -267,8 +282,8 @@ class AnnealRunner():
         if self.config.data.dataset == 'MNIST':
             samples = torch.rand(grid_size ** 2, 1, 28, 28, device=self.config.device)
             # Using custom_anneal_Langevin_dynamics for MNIST 
-            # all_samples = self.custom_anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
-            all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
+            all_samples = self.custom_anneal_Langevin_dynamics(samples, score, sigmas, 20, 0.00002)
+            # all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
 
 
             for i, sample in enumerate(tqdm.tqdm(all_samples, total=len(all_samples), desc='saving images')):
@@ -283,8 +298,8 @@ class AnnealRunner():
                     im = Image.fromarray(image_grid.mul_(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to('cpu', torch.uint8).numpy())
                     imgs.append(im)
 
-                save_image(image_grid, os.path.join(self.args.image_folder, 'image_{}.png'.format(i)))
-                torch.save(sample, os.path.join(self.args.image_folder, 'image_raw_{}.pth'.format(i)))
+                # save_image(image_grid, os.path.join(self.args.image_folder, 'image_{}.png'.format(i)))
+                # torch.save(sample, os.path.join(self.args.image_folder, 'image_raw_{}.pth'.format(i)))
 
 
         else:
@@ -304,8 +319,8 @@ class AnnealRunner():
                     im = Image.fromarray(image_grid.mul_(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to('cpu', torch.uint8).numpy())
                     imgs.append(im)
 
-                save_image(image_grid, os.path.join(self.args.image_folder, 'image_{}.png'.format(i)), nrow=10)
-                torch.save(sample, os.path.join(self.args.image_folder, 'image_raw_{}.pth'.format(i)))
+                # save_image(image_grid, os.path.join(self.args.image_folder, 'image_{}.png'.format(i)), nrow=10)
+                # torch.save(sample, os.path.join(self.args.image_folder, 'image_raw_{}.pth'.format(i)))
 
         imgs[0].save(os.path.join(self.args.image_folder, "movie.gif"), save_all=True, append_images=imgs[1:], duration=1, loop=0)
 

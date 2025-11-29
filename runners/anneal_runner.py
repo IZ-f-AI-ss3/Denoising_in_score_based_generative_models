@@ -280,9 +280,8 @@ class AnnealRunner():
         if self.config.data.dataset == 'MNIST':
             samples = torch.rand(grid_size ** 2, 1, 28, 28, device=self.config.device)
             # Using custom_anneal_Langevin_dynamics for MNIST 
-            final_sigma_list = [sigmas[-1]]
-            all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, final_sigma_list, 200, 0.00002)
-            # all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
+            
+            all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 20, 0.00002)
             # all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
 
 

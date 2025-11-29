@@ -350,7 +350,7 @@ class AnnealRunner():
 
             return images
 
-def half_denoising_anneal_Langevin_dynamics_inpainting(self, x_mod, refer_image, scorenet, sigmas, n_steps_each=100,
+    def half_denoising_anneal_Langevin_dynamics_inpainting(self, x_mod, refer_image, scorenet, sigmas, n_steps_each=100,
                                             step_lr=0.000008):
         images = []
 

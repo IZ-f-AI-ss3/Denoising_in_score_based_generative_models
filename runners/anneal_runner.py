@@ -281,8 +281,8 @@ class AnnealRunner():
             samples = torch.rand(grid_size ** 2, 1, 28, 28, device=self.config.device)
             # Using custom_anneal_Langevin_dynamics for MNIST 
             
-            all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 20, 0.00002)
-            # all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 100, 0.00002)
+            # all_samples = self.half_denoising_anneal_Langevin_dynamics(samples, score, sigmas, 20, 0.00002)
+            all_samples = self.anneal_Langevin_dynamics(samples, score, sigmas, 20, 0.00002)
 
 
             for i, sample in enumerate(tqdm.tqdm(all_samples, total=len(all_samples), desc='saving images')):
